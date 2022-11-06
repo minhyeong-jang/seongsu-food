@@ -8,8 +8,8 @@ const App = () => {
     <BrowserRouter>
       <Suspense fallback={<div style={{ minHeight: "100vh" }} />}>
         <Routes>
-          <Route path='/' element={<NaverFoodPriceContainer />} />
-          <Route path='*' element={<Navigate replace to='/' />} />
+          <Route path='/seongsu-food' element={<NaverFoodPriceContainer />} />
+          <Route path='*' element={<Navigate replace to='/seongsu-food' />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
