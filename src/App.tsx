@@ -1,15 +1,18 @@
-import "./App.css";
-import { Route, Routes } from "react-router-dom";
+import "antd/dist/antd.css";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Suspense } from "react";
-import { NaverFoodPriceCollectionContainer } from "./containers";
+import { NaverFoodPriceContainer } from "./containers";
 
 const App = () => {
   return (
-    <Suspense fallback={<div style={{ minHeight: "100vh" }} />}>
-      <Routes>
-        <Route path='/' element={<NaverFoodPriceCollectionContainer />} />
-      </Routes>
-    </Suspense>
+    <BrowserRouter>
+      <Suspense fallback={<div style={{ minHeight: "100vh" }} />}>
+        <Routes>
+          <Route path='/' element={<NaverFoodPriceContainer />} />
+          <Route path='*' element={<Navigate replace to='/' />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   );
 };
 
