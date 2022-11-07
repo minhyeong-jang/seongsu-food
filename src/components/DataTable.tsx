@@ -32,6 +32,7 @@ export const DataTable: FC<Props> = ({
         showTotal: (total: number, range: [number, number]) =>
           `총 ${total.toLocaleString()} 개 ( ${range[0].toLocaleString()}-${range[1].toLocaleString()} )`,
         total: pagination.total,
+        onChange: (_, pageSize) => setPageSize(pageSize),
       };
       if (typeof pagination.current === "number") {
         config.current = pagination.current + 1;

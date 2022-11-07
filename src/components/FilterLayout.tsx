@@ -36,10 +36,10 @@ export const FilterLayout: FC<Props> = ({
         {onReset && (
           <StyledActionButton
             disabled={isLoading}
-            type='default'
+            type='primary'
             onClick={() => onReset()}
           >
-            초기화
+            전체선택/해제
           </StyledActionButton>
         )}
       </StyledActionWrap>
@@ -66,5 +66,7 @@ const StyledActionWrap = styled.div`
   text-align: right;
 `;
 const StyledActionButton = styled(Button)`
-  margin: 4px 8px 8px;
+  margin: 4px 4px 8px;
+  font-size: 12px;
+  border-radius: 4px;
 `;

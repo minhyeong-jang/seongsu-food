@@ -1,26 +1,33 @@
-import styled from "@emotion/styled";
-import { Button } from "antd";
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import {
   FilterCheckboxGroup,
   FilterInput,
   FilterItem,
   FilterLayout,
 } from "../components";
+import { CAFE_CATEGORY, DINNER_CATEGORY } from "../construct";
 import { FoodDataItemModel } from "../types";
 
 interface Props {
-  keyword: string;
   list: FoodDataItemModel[];
   categories: string[];
   onCategoryChange(value: string[]): void;
+  onSubmit(keyword: string): void;
 }
+const initCategory = {
+  foodCategory: [],
+  cafeCategory: [],
+  dinnerCategory: [],
+} as { [key: string]: string[] };
 export const NaverFoodPriceFilterContainer: FC<Props> = ({
-  keyword,
   list,
   categories,
   onCategoryChange,
+  onSubmit,
 }) => {
+  const [keyword, setKeyword] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(initCategory);
+
   const categoryUniq = useMemo(() => {
     let category: string[] = [];
     list.forEach((item) =>
@@ -32,38 +39,83 @@ export const NaverFoodPriceFilterContainer: FC<Props> = ({
       value: item,
     }));
   }, [list]);
+
+  const [foodCategory, cafeCategory, dinnerCategory] = useMemo(() => {
+    return [
+      categoryUniq.filter(
+        (category) =>
+          !CAFE_CATEGORY.includes(category.label) &&
+          !DINNER_CATEGORY.includes(category.label)
+      ),
+      categoryUniq.filter((category) => CAFE_CATEGORY.includes(category.label)),
+      categoryUniq.filter((category) =>
+        DINNER_CATEGORY.includes(category.label)
+      ),
+    ];
+  }, [categoryUniq]);
+
+  const onChange = (key: string, categories: string[]) => {
+    setSelectedCategory((prev) => ({
+      ...prev,
+      [key]: categories,
+    }));
+  };
+
   const onAllClick = () => {
     if (categories.length === categoryUniq.length) {
-      onCategoryChange([]);
+      setSelectedCategory(initCategory);
     } else {
-      onCategoryChange(categoryUniq.map((item) => item.value));
+      setSelectedCategory({
+        foodCategory: foodCategory.map((item) => item.value),
+        cafeCategory: cafeCategory.map((item) => item.value),
+        dinnerCategory: dinnerCategory.map((item) => item.value),
+      });
     }
   };
+
+  useEffect(() => {
+    onCategoryChange([
+      ...selectedCategory.foodCategory,
+      ...selectedCategory.cafeCategory,
+      ...selectedCategory.dinnerCategory,
+    ]);
+  }, [onCategoryChange, selectedCategory]);
+
+  useEffect(() => {
+    onAllClick();
+  }, []);
+
   return (
-    <FilterLayout>
+    <FilterLayout onReset={onAllClick} onSubmit={() => onSubmit(keyword)}>
       <FilterItem colSpan={3} label='검색어'>
         <FilterInput
-          disabled={true}
           placeholder='음식점'
           value={keyword}
-          // onChange={setKeyword}
+          disabled
+          onChange={setKeyword}
         />
       </FilterItem>
-      <FilterItem label='카테고리'>
+      <FilterItem label='음식점'>
         <FilterCheckboxGroup
-          items={categoryUniq}
-          value={categories}
-          onChange={onCategoryChange}
+          items={foodCategory}
+          value={selectedCategory.foodCategory}
+          onChange={(value: string[]) => onChange("foodCategory", value)}
         />
-        <StyledButton type='primary' size='small' onClick={onAllClick}>
-          전체 선택/해제
-        </StyledButton>
+      </FilterItem>
+      <FilterItem label='카페/샐러드'>
+        <FilterCheckboxGroup
+          items={cafeCategory}
+          value={selectedCategory.cafeCategory}
+          onChange={(value: string[]) => onChange("cafeCategory", value)}
+        />
+      </FilterItem>
+      <FilterItem label='저녁메뉴'>
+        <FilterCheckboxGroup
+          items={dinnerCategory}
+          value={selectedCategory.dinnerCategory}
+          onChange={(value: string[]) => onChange("dinnerCategory", value)}
+        />
       </FilterItem>
     </FilterLayout>
   );
 };
-
-const StyledButton = styled(Button)`
-  font-size: 11px;
-  border-radius: 4px;
-`;
