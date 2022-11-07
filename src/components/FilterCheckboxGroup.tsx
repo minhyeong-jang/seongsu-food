@@ -32,5 +32,6 @@ export const FilterCheckboxGroup = <T extends string | number>({
 const StyledCheckboxGroup = styled(CheckboxGroup)`
   label {
     font-size: 12px !important;
+    min-width: 130px;
   }
 `;

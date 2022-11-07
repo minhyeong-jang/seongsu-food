@@ -26,7 +26,8 @@ export const NaverFoodPriceFilterContainer: FC<Props> = ({
     list.forEach((item) =>
       item.category.map((item) => category.push(item as string))
     );
-    return Array.from(new Set([...category])).map((item) => ({
+    const uniqCategory = Array.from(new Set([...category])).sort();
+    return uniqCategory.map((item) => ({
       label: item,
       value: item,
     }));
