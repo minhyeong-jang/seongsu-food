@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/seongsu-food/static/css/main.2302dc43.css",
-    "main.js": "/seongsu-food/static/js/main.1f914080.js",
+    "main.js": "/seongsu-food/static/js/main.0aeea168.js",
     "index.html": "/seongsu-food/index.html",
     "main.2302dc43.css.map": "/seongsu-food/static/css/main.2302dc43.css.map",
-    "main.1f914080.js.map": "/seongsu-food/static/js/main.1f914080.js.map"
+    "main.0aeea168.js.map": "/seongsu-food/static/js/main.0aeea168.js.map"
   },
   "entrypoints": [
     "static/css/main.2302dc43.css",
-    "static/js/main.1f914080.js"
+    "static/js/main.0aeea168.js"
   ]
 }
