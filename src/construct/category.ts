@@ -90,3 +90,36 @@ export const DINNER_CATEGORY = [
   "와인",
   "프랑스음식",
 ];
+
+
+
+// 네이버맵 Console 호출
+// let items = [];
+// let getFoodList = async (keyword, page) => {
+//   fetch(
+//     `https://map.naver.com/p/api/search/allSearch?query=${encodeURIComponent(keyword)}&type=all&searchCoord=127.02272261085858%3B37.520541974950504&placeSearchOption=clientX%3D127.04965%26clientY%3D37.542108%26display%3D70%26entry%3Dbmp%26x%3D127.04964994606178%26y%3D37.542107999999786&boundary=127.01947699714782%3B37.51565317758033%3B127.02611710593311%3B37.5253123766381&displayCount=100&page=${page}`
+//   )
+//     .then((res) => res.json())
+//     .then((data) => {
+//         items = [
+//           ...items,
+//           ...data.result.place.list.map((item) => ({
+//             id: item.id,
+//             category: item.category,
+//             display: item.display,
+//             menuInfo: item.menuInfo,
+//           })),
+//         ];
+//           console.log(items);
+//     })
+//     .catch((e) => console.log(e));
+// }
+
+// let onSubmit = (keyword) => {
+//   for (let i = 1; i < 5; i++) {
+//     setTimeout(() => {
+//       getFoodList(keyword, i);
+//     }, i * 1000);
+//   }
+// };
+// onSubmit('밥집')

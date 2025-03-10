@@ -1,118 +1,153 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import {
   FilterCheckboxGroup,
   FilterInput,
   FilterItem,
   FilterLayout,
+  FilterSelect,
 } from "../components";
 import { CAFE_CATEGORY, DINNER_CATEGORY } from "../construct";
 import { FoodDataItemModel } from "../types";
+import { placeList } from "../hooks";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface Props {
   list: FoodDataItemModel[];
-  categories: string[];
+  categories: {
+    foodCategory: { label: string; value: string }[];
+    cafeCategory: { label: string; value: string }[];
+    dinnerCategory: { label: string; value: string }[];
+  };
+  categoryUniq: { label: string; value: string }[];
   onCategoryChange(value: string[]): void;
   onSubmit(keyword: string): void;
+  selectPlace: string;
+  setSelectPlace(place: string): void;
+  selectedCategories: string[];
+  onCheckAll(place: string): void;
 }
-const initCategory = {
-  foodCategory: [],
-  cafeCategory: [],
-  dinnerCategory: [],
-} as { [key: string]: string[] };
 export const NaverFoodPriceFilterContainer: FC<Props> = ({
   list,
   categories,
+  categoryUniq,
   onCategoryChange,
   onSubmit,
+  selectPlace,
+  setSelectPlace,
+  selectedCategories,
+  onCheckAll,
 }) => {
-  const [keyword, setKeyword] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(initCategory);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const categoryUniq = useMemo(() => {
-    let category: string[] = [];
-    list.forEach((item) =>
-      item.category.map((item) => category.push(item as string))
-    );
-    const uniqCategory = Array.from(new Set([...category])).sort();
-    return uniqCategory.map((item) => ({
-      label: item,
-      value: item,
-    }));
-  }, [list]);
+  const onChange = (
+    categoryType: "foodCategory" | "cafeCategory" | "dinnerCategory",
+    newValues: string[]
+  ) => {
+    const currentFoodCategories =
+      categoryType === "foodCategory"
+        ? newValues
+        : selectedCategories.filter((cat) =>
+            categories.foodCategory.some((f) => f.value === cat)
+          );
+    const currentCafeCategories =
+      categoryType === "cafeCategory"
+        ? newValues
+        : selectedCategories.filter((cat) =>
+            categories.cafeCategory.some((c) => c.value === cat)
+          );
+    const currentDinnerCategories =
+      categoryType === "dinnerCategory"
+        ? newValues
+        : selectedCategories.filter((cat) =>
+            categories.dinnerCategory.some((d) => d.value === cat)
+          );
 
-  const [foodCategory, cafeCategory, dinnerCategory] = useMemo(() => {
-    return [
-      categoryUniq.filter(
-        (category) =>
-          !CAFE_CATEGORY.includes(category.label) &&
-          !DINNER_CATEGORY.includes(category.label)
-      ),
-      categoryUniq.filter((category) => CAFE_CATEGORY.includes(category.label)),
-      categoryUniq.filter((category) =>
-        DINNER_CATEGORY.includes(category.label)
-      ),
+    const allCategories = [
+      ...currentFoodCategories,
+      ...currentCafeCategories,
+      ...currentDinnerCategories,
     ];
-  }, [categoryUniq]);
 
-  const onChange = (key: string, categories: string[]) => {
-    setSelectedCategory((prev) => ({
-      ...prev,
-      [key]: categories,
-    }));
+    onCategoryChange(allCategories);
   };
 
+  const onAllChecked = useCallback(() => {
+    onCategoryChange([
+      ...categories.foodCategory.map((item) => item.value),
+      ...categories.cafeCategory.map((item) => item.value),
+      ...categories.dinnerCategory.map((item) => item.value),
+    ]);
+  }, [
+    categories.cafeCategory,
+    categories.dinnerCategory,
+    categories.foodCategory,
+    onCategoryChange,
+  ]);
+
   const onAllClick = () => {
-    if (categories.length === categoryUniq.length) {
-      setSelectedCategory(initCategory);
+    if (selectedCategories.length === categoryUniq.length) {
+      onCategoryChange([]);
     } else {
-      setSelectedCategory({
-        foodCategory: foodCategory.map((item) => item.value),
-        cafeCategory: cafeCategory.map((item) => item.value),
-        dinnerCategory: dinnerCategory.map((item) => item.value),
-      });
+      onAllChecked();
     }
   };
 
   useEffect(() => {
-    onCategoryChange([
-      ...selectedCategory.foodCategory,
-      ...selectedCategory.cafeCategory,
-      ...selectedCategory.dinnerCategory,
-    ]);
-  }, [onCategoryChange, selectedCategory]);
-
-  useEffect(() => {
-    onAllClick();
-  }, []);
+    const params = new URLSearchParams(window.location.search);
+    if (selectedCategories.length > 0) {
+      params.set("categories", selectedCategories.join(","));
+    } else {
+      params.delete("categories");
+    }
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, "", newUrl);
+  }, [onCategoryChange, selectedCategories]);
 
   return (
-    <FilterLayout onReset={onAllClick} onSubmit={() => onSubmit(keyword)}>
-      <FilterItem colSpan={3} label='검색어'>
-        <FilterInput
-          placeholder='음식점'
-          value={keyword}
-          disabled
-          onChange={setKeyword}
+    <FilterLayout onReset={onAllClick}>
+      <FilterItem colSpan={3} label="검색어">
+        <FilterSelect
+          options={placeList.map((item) => ({
+            label: `${item.name} (검색어 : ${item.keyword})`,
+            value: item.key,
+          }))}
+          value={selectPlace}
+          onChange={(value) => {
+            setSelectPlace(value);
+            onCheckAll(value);
+            const searchParams = new URLSearchParams(location.search);
+            searchParams.set("locale", value);
+            navigate(`${location.pathname}?${searchParams.toString()}`, {
+              replace: true,
+            });
+          }}
         />
       </FilterItem>
-      <FilterItem label='음식점'>
+      <FilterItem label="음식점">
         <FilterCheckboxGroup
-          items={foodCategory}
-          value={selectedCategory.foodCategory}
+          items={categories.foodCategory}
+          value={selectedCategories.filter((cat) =>
+            categories.foodCategory.some((f) => f.value === cat)
+          )}
           onChange={(value: string[]) => onChange("foodCategory", value)}
         />
       </FilterItem>
-      <FilterItem label='카페/샐러드'>
+      <FilterItem label="카페/샐러드">
         <FilterCheckboxGroup
-          items={cafeCategory}
-          value={selectedCategory.cafeCategory}
+          items={categories.cafeCategory}
+          value={selectedCategories.filter((cat) =>
+            categories.cafeCategory.some((c) => c.value === cat)
+          )}
           onChange={(value: string[]) => onChange("cafeCategory", value)}
         />
       </FilterItem>
-      <FilterItem label='저녁메뉴'>
+      <FilterItem label="저녁메뉴">
         <FilterCheckboxGroup
-          items={dinnerCategory}
-          value={selectedCategory.dinnerCategory}
+          items={categories.dinnerCategory}
+          value={selectedCategories.filter((cat) =>
+            categories.dinnerCategory.some((d) => d.value === cat)
+          )}
           onChange={(value: string[]) => onChange("dinnerCategory", value)}
         />
       </FilterItem>

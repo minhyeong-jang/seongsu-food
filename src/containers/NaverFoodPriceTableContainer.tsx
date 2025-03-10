@@ -84,7 +84,7 @@ export const NaverFoodPriceTableContainer: FC<Props> = ({
         pageSize: 20,
         total: dataSource.length,
       }}
-      rowKey={(record) => `${record.id}`}
+      rowKey={(record) => `${record.display}-${record.menuInfo}`}
     />
   );
 };
